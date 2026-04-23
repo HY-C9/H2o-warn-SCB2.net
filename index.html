@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>2 ยอด SCB ไทยพาณิชย์ (3)</title>
+    <title>ถอน 2 ยอด SCB ไทยพาณิชย์(3)</title>
     
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
@@ -151,11 +151,11 @@
       <a href="#" class="btn btn-outline-danger btn-sm w-100 rounded-pill mb-2 py-2 fw-medium d-flex justify-content-center align-items-center">
         <i class="bi bi-headset me-1"></i> ติดต่อผู้ดูแลระบบ
       </a>
-      <a href="#" onclick="window.logoutApp()" class="btn btn-theme-super btn-sm w-100 rounded-pill py-2 fw-medium d-flex justify-content-center align-items-center">
+      <a href="#" onclick="window.logoutApp()" class="btn btn-danger btn-sm w-100 rounded-pill py-2 fw-medium d-flex justify-content-center align-items-center">
         <i class="bi bi-box-arrow-right me-1"></i> ออกจากระบบ
       </a>
     </div>
-</aside>
+  </aside>
 
   <div class="slip-main">
     <nav class="navbar navbar-expand-lg slip-navbar d-flex justify-content-between align-items-center">
@@ -185,6 +185,21 @@
         
         <div class="col-lg-5">
             
+            <div class="d-flex justify-content-between align-items-center mb-2 px-1">
+                <div class="text-warning fw-medium" style="font-size: 0.85rem;"><i class="bi bi-lightning-charge-fill"></i> เมนูด่วน</div>
+                <div class="d-flex gap-2">
+                    <button class="btn btn-sm btn-outline-danger py-1 px-2" style="font-size: 0.75rem;" onclick="clearForm()" title="ล้างค่าทั้งหมด">
+                        <i class="bi bi-trash"></i> ล้าง
+                    </button>
+                    <button class="btn btn-sm btn-outline-primary py-1 px-2" style="font-size: 0.75rem;" onclick="saveFavorite()" title="บันทึกรายการปัจจุบัน">
+                        <i class="bi bi-bookmark-plus"></i> บันทึกไว้
+                    </button>
+                    <button class="btn btn-sm btn-warning py-1 px-2 fw-bold text-dark" style="font-size: 0.75rem;" onclick="loadFavorite()" title="โหลดรายการที่บันทึกไว้">
+                        <i class="bi bi-star-fill"></i> ใช้รายการโปรด
+                    </button>
+                </div>
+            </div>
+
             <div class="form-section-card">
                 <div class="form-section-title"><i class="bi bi-phone"></i> ตั้งค่าโทรศัพท์ & พื้นหลัง</div>
                 <div class="row g-2 align-items-end">
@@ -400,9 +415,100 @@
             }
         });
     }
+
+    // --------------------------------------------------------
+    // ฟังก์ชัน: การจัดการ เมนูด่วน (Clear / Save / Load)
+    // --------------------------------------------------------
+    const STORAGE_KEY = 'slipFav_SCB_IN_3';
+
+    window.clearForm = function() {
+        const now = new Date();
+        const timeStr = now.toTimeString().slice(0,5);
+        if(document.getElementById('datetime_plus_one')) document.getElementById('datetime_plus_one').value = timeStr;
+        if(document.getElementById('backgroundSelect')) document.getElementById('backgroundSelect').selectedIndex = 0;
+        
+        if(document.getElementById('battery')) {
+            document.getElementById('battery').value = 100;
+            updateBatteryUI();
+        }
+        const btnPower = document.getElementById('powerSavingMode');
+        if(btnPower && btnPower.classList.contains('btn-warning')) {
+            togglePowerSavingMode();
+        }
+
+        if(document.getElementById('senderaccount1')) document.getElementById('senderaccount1').value = 'X-5632';
+
+        now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+        const localISO = now.toISOString().slice(0, 16);
+        
+        // รายการ 1
+        if(document.getElementById('name1')) document.getElementById('name1').value = 'Wirawut';
+        if(document.getElementById('money01')) document.getElementById('money01').value = '30,365.00';
+        if(document.getElementById('money10')) document.getElementById('money10').value = '33,365.00';
+        if(document.getElementById('datetime')) document.getElementById('datetime').value = localISO;
+        if(document.getElementById('bank1')) document.getElementById('bank1').selectedIndex = 0; // กรุงไทย
+        if(document.getElementById('receiveraccount')) document.getElementById('receiveraccount').value = 'x-5317';
+
+        // รายการ 2
+        if(document.getElementById('name2')) document.getElementById('name2').value = 'Wirawut';
+        if(document.getElementById('money02')) document.getElementById('money02').value = '30,365.00';
+        if(document.getElementById('money11')) document.getElementById('money11').value = '33,365.00';
+        if(document.getElementById('datetime1')) document.getElementById('datetime1').value = localISO;
+        if(document.getElementById('bank2')) document.getElementById('bank2').selectedIndex = 0; // กรุงไทย
+        if(document.getElementById('receiveraccount1')) document.getElementById('receiveraccount1').value = 'x-5317';
+
+        if(window.updateDisplay) window.updateDisplay();
+    };
+
+    window.saveFavorite = function() {
+        const favData = {
+            bg: document.getElementById('backgroundSelect') ? document.getElementById('backgroundSelect').value : '',
+            sAcc1: document.getElementById('senderaccount1') ? document.getElementById('senderaccount1').value : '',
+            
+            n1: document.getElementById('name1') ? document.getElementById('name1').value : '',
+            money01: document.getElementById('money01') ? document.getElementById('money01').value : '',
+            money10: document.getElementById('money10') ? document.getElementById('money10').value : '',
+            b1: document.getElementById('bank1') ? document.getElementById('bank1').value : '',
+            rAcc: document.getElementById('receiveraccount') ? document.getElementById('receiveraccount').value : '',
+            
+            n2: document.getElementById('name2') ? document.getElementById('name2').value : '',
+            money02: document.getElementById('money02') ? document.getElementById('money02').value : '',
+            money11: document.getElementById('money11') ? document.getElementById('money11').value : '',
+            b2: document.getElementById('bank2') ? document.getElementById('bank2').value : '',
+            rAcc1: document.getElementById('receiveraccount1') ? document.getElementById('receiveraccount1').value : ''
+        };
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(favData));
+        alert('⭐ บันทึกรายการนี้เป็น "รายการโปรด" เรียบร้อยแล้ว!');
+    };
+
+    window.loadFavorite = function() {
+        const savedStr = localStorage.getItem(STORAGE_KEY);
+        if (savedStr) {
+            const favData = JSON.parse(savedStr);
+            
+            if(favData.bg !== undefined && document.getElementById('backgroundSelect')) document.getElementById('backgroundSelect').value = favData.bg;
+            if(favData.sAcc1 !== undefined && document.getElementById('senderaccount1')) document.getElementById('senderaccount1').value = favData.sAcc1;
+            
+            if(favData.n1 !== undefined && document.getElementById('name1')) document.getElementById('name1').value = favData.n1;
+            if(favData.money01 !== undefined && document.getElementById('money01')) document.getElementById('money01').value = favData.money01;
+            if(favData.money10 !== undefined && document.getElementById('money10')) document.getElementById('money10').value = favData.money10;
+            if(favData.b1 !== undefined && document.getElementById('bank1')) document.getElementById('bank1').value = favData.b1;
+            if(favData.rAcc !== undefined && document.getElementById('receiveraccount')) document.getElementById('receiveraccount').value = favData.rAcc;
+            
+            if(favData.n2 !== undefined && document.getElementById('name2')) document.getElementById('name2').value = favData.n2;
+            if(favData.money02 !== undefined && document.getElementById('money02')) document.getElementById('money02').value = favData.money02;
+            if(favData.money11 !== undefined && document.getElementById('money11')) document.getElementById('money11').value = favData.money11;
+            if(favData.b2 !== undefined && document.getElementById('bank2')) document.getElementById('bank2').value = favData.b2;
+            if(favData.rAcc1 !== undefined && document.getElementById('receiveraccount1')) document.getElementById('receiveraccount1').value = favData.rAcc1;
+
+            if(window.updateDisplay) window.updateDisplay();
+        } else {
+            alert('⚠️ คุณยังไม่ได้บันทึกรายการโปรด');
+        }
+    };
 </script>
 
-<script src="js/slipscb2.js"></script> 
+<script src="js/slipscb3.js"></script> 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
     import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
@@ -425,7 +531,6 @@
         if (!user) {
             window.location.replace('https://hy-c9.github.io/Slip-H2o-login.net/');
         } else {
-
             const emailElem = document.getElementById('userEmailDisplay');
             if (emailElem) emailElem.innerText = user.email;
 
